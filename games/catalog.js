@@ -32,5 +32,6 @@ window.GAME_CATALOG = [
   "petualanganaman.js",
   "bata.js",
   "ufo.js",
-  "pong.js"
+  "pong.js",
+  "terbang.js"
 ];
