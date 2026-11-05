@@ -1,0 +1,926 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Portal Game Semua Umur</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #e8f4fb;
+        --bg-soft: #fdf3d8;
+        --card: #ffffff;
+        --ink: #1d2b38;
+        --ink-soft: #54677a;
+        --line: #d7e6ef;
+        --coral: #c93325;
+        --coral-dark: #9e2a1e;
+        --sun: #ffb92e;
+        --sun-dark: #e89b00;
+        --teal: #0d7a6c;
+        --teal-dark: #095e52;
+        --sky: #3d9be9;
+        --pink: #f06292;
+        --shadow: 0 10px 24px rgba(29, 43, 56, .12);
+        --shadow-sm: 0 4px 12px rgba(29, 43, 56, .10);
+        --radius: 22px;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #101c26;
+          --bg-soft: #1a2a38;
+          --card: #1c2d3d;
+          --ink: #eef6fb;
+          --ink-soft: #a9bfce;
+          --line: #2c4356;
+          --shadow: 0 10px 24px rgba(0, 0, 0, .45);
+          --shadow-sm: 0 4px 12px rgba(0, 0, 0, .35);
+        }
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: "Nunito", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        -webkit-tap-highlight-color: transparent;
+      }
+      h1, h2, h3, .display { font-family: "Fredoka", "Nunito", sans-serif; }
+      button { font-family: inherit; cursor: pointer; }
+      :focus-visible { outline: 3px solid var(--sky); outline-offset: 2px; border-radius: 8px; }
+
+      .wrap { max-width: 1080px; margin: 0 auto; padding: 0 18px 64px; }
+
+      /* Design notes: every game keeps the same card layout so families can scan the
+         collection quickly, and each game gets its own pastel artwork color so young
+         children who cannot read yet can still recognize a game by its color.
+         Pill shapes and soft shadows are deliberate: they read as friendly, touchable
+         objects for kids. The hero circles echo the Simon pad colors and balance the
+         mascot side of the hero. Text colors on the coral and teal buttons were
+         darkened until white text on them passes a 4.5:1 contrast ratio. */
+      /* Hero */
+      .hero {
+        position: relative;
+        margin: 18px auto 0;
+        background: var(--bg-soft);
+        border: 3px solid var(--line);
+        border-radius: 30px;
+        padding: 30px 26px 26px;
+        overflow: hidden;
+      }
+      .hero-inner { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; position: relative; z-index: 1; }
+      .hero-text { flex: 1 1 320px; min-width: 260px; }
+      .hero h1 {
+        margin: 0 0 10px;
+        font-size: clamp(2rem, 6vw, 3.3rem);
+        line-height: 1.05;
+        font-weight: 700;
+        letter-spacing: .2px;
+      }
+      .hero h1 .w-coral { color: var(--coral); }
+      .hero h1 .w-teal { color: var(--teal-dark); }
+      @media (prefers-color-scheme: dark) { .hero h1 .w-teal { color: #35d0ba; } }
+      .hero p { margin: 0 0 20px; font-size: 1.06rem; font-weight: 600; color: var(--ink-soft); max-width: 46ch; }
+      .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+      .btn {
+        border: none; border-radius: 999px; padding: 13px 24px;
+        font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 1.02rem;
+        box-shadow: var(--shadow-sm); transition: transform .12s ease, box-shadow .12s ease;
+      }
+      .btn:active { transform: translateY(2px) scale(.98); }
+      .btn-coral { background: var(--coral); color: #fff; }
+      .btn-coral:hover { background: var(--coral-dark); }
+      .btn-sun { background: var(--sun); color: #4a3200; }
+      .btn-sun:hover { background: var(--sun-dark); color: #4a3200; }
+      .btn-ghost { background: var(--card); color: var(--ink); border: 2px solid var(--line); }
+
+      /* Mascot */
+      .mascot-zone { flex: 0 1 240px; display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 0 auto; }
+      .bubble {
+        position: relative; background: var(--card); border: 2px solid var(--line);
+        border-radius: 16px; padding: 10px 14px; font-weight: 800; font-size: .95rem;
+        max-width: 240px; text-align: center; box-shadow: var(--shadow-sm);
+      }
+      .bubble::after {
+        content: ""; position: absolute; left: 50%; bottom: -9px; transform: translateX(-50%);
+        border: 9px solid transparent; border-top-color: var(--card); border-bottom: 0;
+      }
+      .mascot-btn { background: none; border: none; padding: 0; line-height: 0; }
+      .mascot-btn svg { width: 168px; height: auto; display: block; }
+      .mascot-btn.bounce svg { animation: bounce .5s ease; }
+      @keyframes bounce {
+        0% { transform: translateY(0) scale(1,1); }
+        30% { transform: translateY(-16px) scale(.96,1.05); }
+        55% { transform: translateY(0) scale(1.06,.92); }
+        75% { transform: translateY(-6px) scale(.99,1.02); }
+        100% { transform: translateY(0) scale(1,1); }
+      }
+      .mascot-hint { font-size: .82rem; font-weight: 700; color: var(--ink-soft); }
+
+      /* floating deco shapes */
+      .deco { position: absolute; border-radius: 50%; opacity: .5; pointer-events: none; }
+      .deco.d1 { width: 90px; height: 90px; background: var(--sun); top: -42px; right: -24px; }
+      .deco.d2 { width: 46px; height: 46px; background: var(--teal); bottom: 18px; left: -14px; }
+      .deco.d3 { width: 26px; height: 26px; background: var(--coral); bottom: 16px; right: 30%; }
+
+      /* Toolbar and filter */
+      .toolbar {
+        display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+        margin: 30px 0 6px;
+      }
+      .toolbar h2 { font-size: 1.55rem; margin: 0; font-weight: 600; }
+      .toolbar .spacer { flex: 1; }
+      .icon-btn {
+        width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--line);
+        background: var(--card); display: grid; place-items: center; box-shadow: var(--shadow-sm);
+      }
+      .icon-btn svg { width: 22px; height: 22px; }
+      .chips { display: flex; gap: 9px; flex-wrap: wrap; margin: 14px 0 22px; }
+      .chip {
+        border: 2px solid var(--line); background: var(--card); color: var(--ink);
+        border-radius: 999px; padding: 10px 18px; min-height: 44px; display: inline-flex; align-items: center; font-weight: 800; font-size: .94rem;
+        transition: background .12s ease, color .12s ease, border-color .12s ease;
+      }
+      .chip.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+      @media (prefers-color-scheme: dark) { .chip.active { background: var(--sun); color: #3a2700; border-color: var(--sun); } }
+
+      /* Game grid */
+      .grid {
+        display: grid; gap: 18px;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      }
+      .gcard {
+        background: var(--card); border: 2px solid var(--line); border-radius: var(--radius);
+        overflow: hidden; box-shadow: var(--shadow-sm); display: flex; flex-direction: column;
+        transition: transform .15s ease, box-shadow .15s ease;
+      }
+      .gcard:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+      .gart { height: 128px; display: grid; place-items: center; position: relative; overflow: hidden; }
+      .gart .big { font-size: 62px; line-height: 1; filter: drop-shadow(0 4px 6px rgba(0,0,0,.18)); }
+      .gart .stars {
+        position: absolute; top: 10px; right: 12px; font-size: .95rem; letter-spacing: 2px;
+        color: #d7e2ec; background: rgba(29, 43, 56, .85); padding: 3px 9px 3px 11px; border-radius: 999px;
+      }
+      .gart .stars .on { color: #ffd94d; }
+      .gbody { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+      .gbody h3 { margin: 0; font-size: 1.22rem; font-weight: 600; }
+      .gbody p { margin: 0; color: var(--ink-soft); font-weight: 600; font-size: .93rem; line-height: 1.45; flex: 1; }
+      .gtags { display: flex; gap: 7px; flex-wrap: wrap; }
+      .tag {
+        font-size: .74rem; font-weight: 900; letter-spacing: .4px; text-transform: uppercase;
+        padding: 4px 10px; border-radius: 999px; background: var(--bg); border: 1.5px solid var(--line); color: var(--ink-soft);
+      }
+      .tag.age { background: var(--bg-soft); color: var(--ink); }
+      .play-btn {
+        margin-top: 6px; border: none; border-radius: 14px; padding: 12px;
+        font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 1rem;
+        background: var(--teal); color: #fff; transition: background .12s ease, transform .12s ease;
+      }
+      .play-btn:hover { background: var(--teal-dark); }
+      .play-btn:active { transform: scale(.97); }
+      .gcard.hidden { display: none; }
+      .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+      .empty-note {
+        display: none; text-align: center; padding: 34px 16px; font-weight: 800; color: var(--ink-soft);
+        background: var(--card); border: 2px dashed var(--line); border-radius: var(--radius);
+      }
+      .empty-note.show { display: block; }
+
+      /* Game stage */
+      #gameView { display: none; }
+      #gameView.open { display: block; }
+      .stage-head { display: flex; align-items: center; gap: 14px; margin: 22px 0 16px; flex-wrap: wrap; }
+      .back-btn {
+        display: inline-flex; align-items: center; gap: 8px; border: 2px solid var(--line);
+        background: var(--card); border-radius: 999px; padding: 10px 18px 10px 13px; min-height: 44px;
+        font-weight: 900; font-size: .95rem; color: var(--ink); box-shadow: var(--shadow-sm);
+      }
+      .back-btn svg { width: 18px; height: 18px; }
+      .stage-head h2 { margin: 0; font-size: 1.6rem; font-weight: 600; }
+      .stage {
+        background: var(--card); border: 2px solid var(--line); border-radius: 26px;
+        box-shadow: var(--shadow); padding: 22px; min-height: 380px;
+      }
+      .hud { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+      .hud .stat {
+        background: var(--bg); border: 2px solid var(--line); border-radius: 14px;
+        padding: 8px 16px; font-weight: 900; font-size: .95rem;
+      }
+      .hud .stat b { color: var(--coral-dark); }
+      @media (prefers-color-scheme: dark) { .hud .stat b { color: var(--sun); } }
+      .center-msg { text-align: center; padding: 26px 10px; }
+      .center-msg .emoji { font-size: 54px; }
+      .center-msg h3 { font-size: 1.5rem; margin: 10px 0 6px; }
+      .center-msg p { color: var(--ink-soft); font-weight: 700; margin: 0 0 18px; }
+
+      /* Memory */
+      .mem-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-width: 460px; margin: 0 auto; }
+      .mem-card {
+        aspect-ratio: 1; border: none; border-radius: 16px; font-size: clamp(26px, 7vw, 40px);
+        background: var(--sky); color: #fff; display: grid; place-items: center;
+        transition: transform .18s ease, background .18s ease; box-shadow: var(--shadow-sm);
+      }
+      .mem-card .face { display: none; }
+      .mem-card .back-face { font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 1.3em; opacity: .85; }
+      .mem-card.flipped { background: var(--bg-soft); transform: rotateY(180deg) scale(1.03); }
+      .mem-card.flipped .face { display: block; transform: rotateY(180deg); }
+      .mem-card.flipped .back-face { display: none; }
+      .mem-card.matched { background: var(--teal); pointer-events: none; }
+      .mem-card.matched .face { filter: none; }
+
+      /* Tebak angka */
+      .guess-box { max-width: 420px; margin: 0 auto; text-align: center; }
+      .guess-box input {
+        width: 130px; padding: 13px; font-size: 1.4rem; font-weight: 900; text-align: center;
+        border: 3px solid var(--line); border-radius: 16px; background: var(--bg); color: var(--ink);
+        font-family: "Fredoka", sans-serif;
+      }
+      .guess-feedback { min-height: 30px; font-weight: 900; font-size: 1.08rem; margin: 14px 0 4px; }
+      .guess-history { display: flex; gap: 7px; flex-wrap: wrap; justify-content: center; margin-top: 12px; }
+      .guess-history span {
+        background: var(--bg); border: 2px solid var(--line); border-radius: 999px;
+        padding: 4px 12px; font-weight: 800; font-size: .88rem;
+      }
+
+      /* Kuis */
+      .quiz-q { font-family: "Fredoka", sans-serif; font-size: 1.35rem; font-weight: 600; margin: 4px 0 16px; line-height: 1.35; }
+      .quiz-opts { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+      @media (max-width: 520px) { .quiz-opts { grid-template-columns: 1fr; } }
+      .quiz-opt {
+        border: 2.5px solid var(--line); background: var(--bg); color: var(--ink);
+        border-radius: 16px; padding: 14px 16px; font-weight: 800; font-size: 1rem; text-align: left;
+        transition: border-color .12s ease, background .12s ease;
+      }
+      .quiz-opt:hover { border-color: var(--sky); }
+      .quiz-opt.right { background: #d9f5e3; border-color: var(--teal); }
+      .quiz-opt.wrong { background: #ffe0dc; border-color: var(--coral); }
+      @media (prefers-color-scheme: dark) {
+        .quiz-opt.right { background: #173d2c; }
+        .quiz-opt.wrong { background: #47201c; }
+      }
+      .timerbar { height: 12px; border-radius: 999px; background: var(--line); overflow: hidden; margin-bottom: 18px; }
+      .timerbar > div { height: 100%; background: var(--sun); border-radius: 999px; transition: width .2s linear; }
+
+      /* Snake */
+      .snake-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+      canvas#snakeCanvas {
+        background: #17301f; border-radius: 18px; border: 3px solid var(--line);
+        width: min(90vw, 360px); height: auto; aspect-ratio: 1; touch-action: none;
+      }
+      .dpad { display: grid; grid-template-columns: repeat(3, 58px); grid-template-rows: repeat(3, 58px); gap: 6px; }
+      .dpad button {
+        border: 2px solid var(--line); background: var(--bg); color: var(--ink);
+        border-radius: 14px; font-size: 1.25rem; font-weight: 900;
+      }
+      .dpad button:active { background: var(--sun); }
+      .dpad .sp { visibility: hidden; }
+
+      /* Tic tac toe */
+      .ttt-grid { display: grid; grid-template-columns: repeat(3, 92px); gap: 10px; justify-content: center; }
+      .ttt-cell {
+        width: 92px; height: 92px; border: 3px solid var(--line); border-radius: 18px;
+        background: var(--bg); font-family: "Fredoka", sans-serif; font-size: 2.5rem; font-weight: 700;
+        color: var(--ink); display: grid; place-items: center;
+      }
+      .ttt-cell.x { color: var(--coral); }
+      .ttt-cell.o { color: var(--sky); }
+      .ttt-cell.win { background: var(--sun); color: #4a3200; border-color: var(--sun-dark); }
+
+      /* Tangkap bintang */
+      .mole-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 420px; margin: 0 auto; }
+      .hole {
+        aspect-ratio: 1.15; border: none; border-radius: 50% 50% 18px 18px / 38% 38% 18px 18px;
+        background: var(--bg); border-bottom: 6px solid var(--line);
+        font-size: clamp(30px, 9vw, 46px); display: grid; place-items: center; overflow: hidden;
+      }
+      .hole .critter { transform: translateY(110%); transition: transform .13s ease; }
+      .hole.up .critter { transform: translateY(6%); }
+      .hole.bonked .critter { transform: translateY(6%) scale(.8) rotate(-14deg); }
+
+      /* Simon */
+      .simon-board { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 340px; margin: 0 auto; }
+      .simon-pad { aspect-ratio: 1.25; border: none; border-radius: 22px; opacity: .45; transition: opacity .12s ease, transform .12s ease; display: grid; place-items: center; font-size: 1.7rem; color: rgba(255,255,255,.92); text-shadow: 0 1px 3px rgba(0,0,0,.35); }
+      .simon-pad span { pointer-events: none; }
+      .simon-pad.pad-yellow { color: #5a4300; text-shadow: none; }
+      .simon-pad.lit { opacity: 1; transform: scale(1.04); }
+      .simon-pad:active { opacity: 1; }
+      .pad-green { background: #35c759; } .pad-red { background: #ff5247; }
+      .pad-yellow { background: #ffcf3f; } .pad-blue { background: #3d9be9; }
+
+      /* Aktivitas Anak section */
+      .act-head { margin: 4px 0 16px; }
+      .act-head h3 { font-family: "Fredoka", sans-serif; font-size: 1.5rem; font-weight: 600; margin: 0 0 4px; }
+      .act-head p { margin: 0; color: var(--ink-soft); font-weight: 700; max-width: 64ch; line-height: 1.5; }
+      #actGrid { margin-bottom: 28px; }
+      #actGrid .gart { height: 142px; }
+      #actGrid .gart .big { font-size: 78px; }
+
+      /* Kids activity games: big text, big targets, no timers */
+      .kiko-bar {
+        display: flex; gap: 14px; align-items: center; background: var(--bg-soft);
+        border: 2px solid var(--line); border-radius: 18px; padding: 14px 18px; margin-bottom: 20px;
+      }
+      .kiko-bar .kiko-face { font-size: 2.2rem; line-height: 1; }
+      .kiko-bar .kiko-text { margin: 0; font-family: "Fredoka", sans-serif; font-weight: 600; font-size: clamp(1.25rem, 4.5vw, 1.7rem); line-height: 1.25; }
+      .big-opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 14px; max-width: 560px; margin: 0 auto; }
+      .big-opt {
+        border: 3px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 20px;
+        min-height: 96px; padding: 14px; display: grid; place-items: center; font-family: "Fredoka", sans-serif;
+        font-weight: 700; transition: transform .12s ease, border-color .12s ease, background .12s ease;
+      }
+      .big-opt:hover { border-color: var(--sky); }
+      .big-opt:active { transform: scale(.96); }
+      .big-opt svg { width: 74px; height: 74px; }
+      .big-opt .num { font-size: 2.6rem; line-height: 1; }
+      .big-opt .letter { font-size: 3rem; line-height: 1; }
+      .big-opt.used { opacity: .35; pointer-events: none; }
+      .shake { animation: shake .45s ease; }
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-9px); }
+        40% { transform: translateX(8px); }
+        60% { transform: translateX(-6px); }
+        80% { transform: translateX(4px); }
+      }
+      .praise-pop { animation: praisePop .5s ease; }
+      @keyframes praisePop { 0% { transform: scale(1); } 40% { transform: scale(1.13) rotate(-2deg); } 100% { transform: scale(1); } }
+      .count-items {
+        display: flex; flex-wrap: wrap; gap: 8px 14px; justify-content: center; align-items: center;
+        background: var(--bg); border: 2px dashed var(--line); border-radius: 20px;
+        padding: 22px 16px; margin-bottom: 20px; font-size: 44px; line-height: 1.25; min-height: 112px;
+      }
+      .row-label { text-align: center; font-weight: 900; color: var(--ink-soft); margin: 0 0 10px; font-size: 1rem; }
+      .shadow-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 22px; }
+      .shadow-item, .shadow-slot {
+        width: 96px; height: 96px; min-width: 96px; border-radius: 22px; border: 3px solid var(--line); background: var(--bg);
+        font-size: 52px; display: grid; place-items: center; position: relative;
+        transition: transform .12s ease, border-color .12s ease, background .12s ease;
+      }
+      .shadow-item.sel { border-color: var(--sun-dark); background: var(--bg-soft); transform: scale(1.07); }
+      .shadow-slot .sil { filter: brightness(0); opacity: .82; pointer-events: none; }
+      .shadow-item.matched, .shadow-slot.matched { border-color: var(--teal); background: #d9f5e3; pointer-events: none; }
+      @media (prefers-color-scheme: dark) { .shadow-item.matched, .shadow-slot.matched { background: #173d2c; } }
+      .shadow-slot.matched .sil { filter: none; opacity: 1; }
+      .matched-badge {
+        position: absolute; top: -10px; right: -8px; background: var(--teal); color: #fff; font-size: .85rem;
+        width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 900;
+      }
+      .teach-card { text-align: center; padding: 6px 0 4px; }
+      .teach-letter { font-family: "Fredoka", sans-serif; font-size: 6.2rem; font-weight: 700; line-height: 1; color: var(--coral); }
+      .teach-emoji { font-size: 64px; line-height: 1.25; }
+      .teach-word { font-family: "Fredoka", sans-serif; font-size: 1.65rem; font-weight: 600; margin: 6px 0 18px; }
+      .palette { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin: 16px 0 18px; }
+      .swatch { width: 52px; height: 52px; border-radius: 50%; border: 3px solid rgba(29, 43, 56, .28); padding: 0; transition: transform .12s ease; }
+      .swatch.sel { transform: scale(1.18); border-color: var(--ink); box-shadow: var(--shadow-sm); }
+      .color-stage { display: grid; place-items: center; background: var(--bg); border: 2px solid var(--line); border-radius: 20px; padding: 14px; }
+      .color-stage svg { width: min(88vw, 420px); height: auto; }
+      .fill-zone { cursor: pointer; }
+      .pic-picker { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+      .seq-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 22px; }
+      .seq-box {
+        width: 52px; height: 60px; border-radius: 14px; border: 3px solid var(--line); background: var(--bg);
+        font-family: "Fredoka", sans-serif; font-size: 1.6rem; font-weight: 700; display: grid; place-items: center; color: var(--ink);
+      }
+      button.seq-box { cursor: pointer; padding: 0; }
+      .seq-box.missing { border-style: dashed; color: var(--ink-soft); background: var(--card); }
+      .seq-box.sel { border-color: var(--sun-dark); border-style: solid; background: var(--bg-soft); transform: scale(1.08); }
+      .seq-box.filled { border-color: var(--teal); border-style: solid; background: #d9f5e3; color: var(--teal-dark); }
+      @media (prefers-color-scheme: dark) { .seq-box.filled { background: #173d2c; color: #7be3c3; } }
+
+      /* Belajar Seru section and games */
+      #eduGrid { margin-bottom: 28px; }
+      #eduGrid .gart { height: 142px; }
+      #eduGrid .gart .big { font-size: 78px; }
+      .big-visual { text-align: center; font-size: 92px; line-height: 1.15; margin: 2px 0 18px; }
+      .big-visual .cap { display: block; font-family: "Fredoka", sans-serif; font-size: 1.55rem; font-weight: 600; color: var(--ink); margin-top: 4px; }
+      .big-opt .opt-text { font-size: 1.28rem; line-height: 1.3; text-align: center; }
+      .big-opt .opt-emoji { display: block; font-size: 2.1rem; line-height: 1.2; }
+      .marble-zone { display: flex; gap: 16px; justify-content: center; align-items: flex-start; flex-wrap: wrap; margin-bottom: 20px; }
+      .marble-group { background: var(--bg); border: 2px dashed var(--line); border-radius: 16px; padding: 12px 12px 8px; }
+      .marbles { display: flex; flex-wrap: wrap; gap: 5px; width: 236px; max-width: 62vw; }
+      .marble { width: 19px; height: 19px; border-radius: 50%; flex: none; position: relative; background: radial-gradient(circle at 35% 30%, #8fe3cf, #0d7a6c); }
+      .marble.b { background: radial-gradient(circle at 35% 30%, #ffb3a0, #c93325); }
+      .marble.gone { opacity: .32; }
+      .marble.gone::after { content: "✕"; position: absolute; inset: 0; display: grid; place-items: center; font-size: 11px; font-weight: 900; color: var(--ink); }
+      .mg-label { text-align: center; font-weight: 900; font-family: "Fredoka", sans-serif; margin-top: 8px; }
+      .mg-op { font-family: "Fredoka", sans-serif; font-size: 2rem; font-weight: 700; align-self: center; }
+      .frac-wrap { display: grid; place-items: center; margin-bottom: 18px; }
+      .frac-wrap svg { width: min(62vw, 220px); height: auto; }
+      .teach-name { font-family: "Fredoka", sans-serif; font-size: clamp(2.2rem, 8vw, 3.2rem); font-weight: 700; line-height: 1.15; color: var(--teal-dark); }
+      @media (prefers-color-scheme: dark) { .teach-name { color: #35d0ba; } }
+      .mix-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 16px; }
+      .mix-glass { width: 168px; height: 188px; border: 5px solid var(--ink-soft); border-top: none; border-radius: 6px 6px 44px 44px; position: relative; overflow: hidden; background: var(--card); }
+      .mix-liquid { position: absolute; left: 0; right: 0; bottom: 0; height: 0; transition: height .45s ease, background-color .45s ease; }
+      .mix-result { font-family: "Fredoka", sans-serif; font-size: 1.35rem; font-weight: 600; min-height: 34px; text-align: center; }
+      .drop-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 14px; }
+      .drop-btn { min-height: 56px; border-radius: 999px; border: 3px solid rgba(29,43,56,.25); padding: 10px 22px; font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 1.05rem; color: #1d2b38; display: inline-flex; align-items: center; gap: 9px; }
+      .drop-btn .dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(29,43,56,.3); display: inline-block; }
+      .target-pill { display: inline-flex; align-items: center; gap: 9px; background: var(--bg-soft); border: 2px solid var(--line); border-radius: 999px; padding: 8px 18px; font-weight: 900; }
+      .target-pill .dot { width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(29,43,56,.3); display: inline-block; }
+      .tug { position: relative; background: var(--bg); border: 2px solid var(--line); border-radius: 20px; height: 118px; margin-bottom: 20px; overflow: hidden; }
+      .tug .rope { position: absolute; left: 5%; right: 5%; top: 58px; height: 7px; background: #b08968; border-radius: 4px; }
+      .tug .mid { position: absolute; left: 50%; top: 10px; bottom: 10px; border-left: 3px dashed var(--ink-soft); }
+      .tug .goal { position: absolute; top: 10px; bottom: 10px; }
+      .tug .goal-l { left: 10%; border-left: 4px solid var(--sun-dark); }
+      .tug .goal-r { right: 10%; border-right: 4px solid var(--sun-dark); }
+      .tug .actor { position: absolute; top: 30px; font-size: 2.5rem; transform: translateX(-50%); }
+      .tug .marker { position: absolute; top: 40px; font-size: 2rem; transform: translateX(-50%); transition: left .45s ease; z-index: 2; }
+      .tug .tug-label { position: absolute; top: 6px; font-size: .8rem; font-weight: 900; color: var(--ink-soft); }
+      .shelf { display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 12px; margin-bottom: 18px; }
+      .shelf-item { border: 3px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 18px; padding: 12px 8px; min-height: 112px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-family: "Fredoka", sans-serif; font-weight: 600; }
+      .shelf-item .e { font-size: 2.4rem; line-height: 1.15; }
+      .shelf-item .p { font-size: .82rem; font-weight: 800; color: var(--ink-soft); font-family: "Nunito", sans-serif; }
+      .basket { background: var(--bg-soft); border: 2px solid var(--line); border-radius: 16px; padding: 12px 16px; margin-bottom: 18px; }
+      .basket .b-title { font-weight: 900; margin-bottom: 6px; }
+      .basket .b-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 3px 0; font-weight: 800; }
+      .basket .b-minus { min-height: 44px; min-width: 44px; border-radius: 12px; border: 2px solid var(--line); background: var(--card); color: var(--ink); font-weight: 900; padding: 6px 12px; }
+      .money-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 14px 0 6px; }
+      .money-btn { min-width: 132px; min-height: 64px; border-radius: 12px; border: 3px dashed rgba(29,43,56,.45); font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 1.15rem; color: #1d2b38; }
+      .money-btn.m1 { background: #ffe08a; } .money-btn.m2 { background: #a8d8ff; } .money-btn.m3 { background: #ffc7dd; }
+      .paid-line { text-align: center; font-family: "Fredoka", sans-serif; font-size: 1.3rem; font-weight: 600; }
+
+      /* Fase 2 games: Word Rush, Jago Akor, Bangun Ruang, Petualangan Aman */
+      .wr-word { font-family: "Fredoka", sans-serif; font-weight: 700; font-size: clamp(2.4rem, 9vw, 3.8rem); text-align: center; margin: 4px 0 6px; letter-spacing: .5px; }
+      .wr-sub { text-align: center; font-weight: 800; color: var(--ink-soft); margin: 0 0 10px; }
+      .wr-row { display: flex; gap: 10px; justify-content: center; align-items: stretch; flex-wrap: wrap; }
+      .wr-input {
+        width: min(78vw, 380px); padding: 14px 18px; font-size: 1.5rem; font-weight: 800; text-align: center;
+        border: 3px solid var(--line); border-radius: 16px; background: var(--bg); color: var(--ink);
+        font-family: "Fredoka", sans-serif;
+      }
+      .wr-feed { min-height: 32px; text-align: center; font-weight: 900; font-size: 1.1rem; margin-top: 14px; line-height: 1.45; }
+      .lvl-grid { display: grid; gap: 12px; max-width: 520px; margin: 0 auto; }
+      .lvl-t { display: block; font-size: 1.35rem; line-height: 1.2; }
+      .lvl-d { display: block; font-family: "Nunito", sans-serif; font-weight: 700; font-size: .92rem; color: var(--ink-soft); margin-top: 3px; line-height: 1.4; }
+
+      .chord-pal { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px; }
+      .chord-btn {
+        min-width: 64px; min-height: 56px; padding: 8px 14px; border-radius: 16px; border: 3px solid var(--line);
+        background: var(--bg); color: var(--ink); font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 1.25rem;
+        transition: transform .12s ease, border-color .12s ease, background .12s ease;
+      }
+      .chord-btn small { display: block; font-family: "Nunito", sans-serif; font-size: .68rem; font-weight: 900; letter-spacing: .4px; color: var(--ink-soft); }
+      .chord-btn.sel { border-color: var(--sun-dark); background: var(--bg-soft); transform: scale(1.07); }
+      .chord-info { text-align: center; font-weight: 800; color: var(--ink-soft); min-height: 26px; margin: 0 auto 16px; max-width: 560px; line-height: 1.5; }
+      .chord-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-width: 560px; margin: 0 auto 18px; }
+      .chord-box {
+        min-height: 72px; border-radius: 16px; border: 3px dashed var(--line); background: var(--bg); color: var(--ink-soft);
+        font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 1.3rem; position: relative; padding: 16px 6px 8px;
+        transition: transform .12s ease, border-color .12s ease, background .12s ease;
+      }
+      .chord-box .beat { position: absolute; top: 4px; left: 9px; font-family: "Nunito", sans-serif; font-size: .64rem; font-weight: 900; letter-spacing: .3px; color: var(--ink-soft); }
+      .chord-box.filled { border-style: solid; border-color: var(--teal); background: #d9f5e3; color: var(--teal-dark); }
+      .chord-box.locked { border-style: solid; border-color: var(--sun-dark); background: var(--bg-soft); color: var(--ink); }
+      .chord-box.playing { border-color: var(--coral); border-style: solid; transform: scale(1.08); box-shadow: var(--shadow-sm); }
+      @media (prefers-color-scheme: dark) { .chord-box.filled { background: #173d2c; color: #7be3c3; } }
+      .chord-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 6px; }
+
+      .shape-picker { display: flex; gap: 9px; flex-wrap: wrap; justify-content: center; margin-bottom: 18px; }
+      .shape-stage { display: grid; place-items: center; background: var(--bg); border: 2px solid var(--line); border-radius: 20px; padding: 16px; margin-bottom: 14px; }
+      .shape-stage svg { width: min(80vw, 300px); height: auto; }
+      .shape-data { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+      .shape-data .sd { background: var(--bg); border: 2px solid var(--line); border-radius: 14px; padding: 8px 18px; font-weight: 900; text-align: center; min-width: 96px; }
+      .shape-data .sd b { display: block; font-size: 1.4rem; color: var(--coral-dark); }
+      .shape-data .sd small { display: block; font-weight: 800; color: var(--ink-soft); }
+      @media (prefers-color-scheme: dark) { .shape-data .sd b { color: var(--sun); } }
+      .net-note { max-width: 460px; text-align: center; font-weight: 800; color: var(--ink-soft); line-height: 1.55; padding: 10px 6px; }
+      .obs-log { background: var(--bg); border: 2px solid var(--line); border-radius: 18px; padding: 14px 18px; margin-top: 20px; }
+      .obs-log h4 { margin: 0 0 4px; font-family: "Fredoka", sans-serif; font-size: 1.12rem; font-weight: 600; }
+      .obs-log .obs-prog { margin: 0 0 8px; font-weight: 800; color: var(--ink-soft); }
+      .obs-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px 0; font-weight: 800; border-top: 1.5px dashed var(--line); }
+      .obs-check { font-weight: 900; color: var(--teal-dark); white-space: nowrap; }
+      @media (prefers-color-scheme: dark) { .obs-check { color: #35d0ba; } }
+      .obs-check.no { color: var(--ink-soft); font-weight: 700; }
+
+      .safe-feed { min-height: 30px; text-align: center; font-weight: 900; font-size: 1.08rem; margin-top: 16px; line-height: 1.5; }
+
+      /* Confetti */
+      .confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 60; }
+      .confetti i {
+        position: absolute; top: -14px; width: 11px; height: 15px; border-radius: 3px;
+        animation: fall linear forwards;
+      }
+      @keyframes fall { to { transform: translateY(105vh) rotate(680deg); } }
+
+      footer { text-align: center; margin-top: 40px; color: var(--ink-soft); font-weight: 700; font-size: .9rem; }
+      footer .foot-mascot { font-size: 1.3rem; }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+        html { scroll-behavior: auto; }
+      }
+      @media (max-width: 560px) {
+        .stage { padding: 16px; }
+        .ttt-grid { grid-template-columns: repeat(3, 80px); }
+        .ttt-cell { width: 80px; height: 80px; font-size: 2.1rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <!-- Home view -->
+      <div id="homeView">
+        <section class="hero">
+          <span class="deco d1"></span><span class="deco d2"></span><span class="deco d3"></span>
+          <div class="hero-inner">
+            <div class="hero-text">
+              <h1>Main Bareng di <span class="w-coral">Portal</span> <span class="w-teal">Game</span> Semua Umur!</h1>
+              <p>Satu tempat buat anak-anak, remaja, sampai orang tua. Pilih game favoritmu, kumpulkan bintang, dan tantang keluargamu, semua gratis dan langsung main di sini.</p>
+              <div class="hero-actions">
+                <button class="btn btn-coral" id="btnRandom">Kotak Keseruan: Acak Game!</button>
+                <button class="btn btn-ghost" id="btnScroll">Lihat Semua Game</button>
+              </div>
+            </div>
+            <div class="mascot-zone">
+              <div class="bubble" id="mascotBubble">Halo! Aku Kiko. Sentuh aku, yuk!</div>
+              <button class="mascot-btn" id="mascotBtn" aria-label="Sentuh maskot Kiko">
+                <svg viewBox="0 0 200 190" role="img" aria-label="Kiko, maskot rubah oranye">
+                  <ellipse cx="100" cy="168" rx="52" ry="12" fill="rgba(0,0,0,.10)"/>
+                  <path d="M52 62 L38 12 L84 34 Z" fill="#f2762e"/>
+                  <path d="M148 62 L162 12 L116 34 Z" fill="#f2762e"/>
+                  <path d="M57 56 L48 26 L76 38 Z" fill="#ffd9a8"/>
+                  <path d="M143 56 L152 26 L124 38 Z" fill="#ffd9a8"/>
+                  <circle cx="100" cy="98" r="62" fill="#ff8c42"/>
+                  <ellipse cx="100" cy="122" rx="34" ry="26" fill="#fff3e2"/>
+                  <circle cx="76" cy="92" r="8.5" fill="#263238"/>
+                  <circle cx="124" cy="92" r="8.5" fill="#263238"/>
+                  <circle cx="79" cy="89" r="3" fill="#fff"/>
+                  <circle cx="127" cy="89" r="3" fill="#fff"/>
+                  <ellipse cx="100" cy="112" rx="9" ry="6.5" fill="#263238"/>
+                  <path d="M100 118 Q100 128 88 128 M100 118 Q100 128 112 128" stroke="#263238" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                  <circle cx="58" cy="110" r="8" fill="#ffb3a0" opacity=".8"/>
+                  <circle cx="142" cy="110" r="8" fill="#ffb3a0" opacity=".8"/>
+                </svg>
+              </button>
+              <div class="mascot-hint">Psst… sentuh Kiko, dia punya banyak kejutan!</div>
+            </div>
+          </div>
+        </section>
+
+        <div class="toolbar" id="gamesAnchor">
+          <h2>Koleksi Game</h2>
+          <div class="spacer"></div>
+          <button class="icon-btn" id="soundBtn" aria-label="Nyalakan atau matikan suara" aria-pressed="true">
+            <svg id="soundOnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.4 5.6a9 9 0 0 1 0 12.8"/></svg>
+            <svg id="soundOffIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="display:none"><path d="M11 5 6 9H2v6h4l5 4z" fill="currentColor" stroke="none"/><line x1="16" y1="9" x2="22" y2="15"/><line x1="22" y1="9" x2="16" y2="15"/></svg>
+          </button>
+        </div>
+
+        <div class="chips" role="group" aria-label="Filter kategori game">
+          <button class="chip active" data-filter="all" aria-pressed="true">Semua</button>
+          <button class="chip" data-filter="anak" aria-pressed="false">Buat Anak</button>
+          <button class="chip" data-filter="keluarga" aria-pressed="false">Keluarga</button>
+          <button class="chip" data-filter="dewasa" aria-pressed="false">Tantangan Dewasa</button>
+          <button class="chip" data-filter="cepat" aria-pressed="false">Main Cepat</button>
+        </div>
+
+        <section id="actSection" aria-labelledby="actTitle">
+          <div class="act-head" id="actHead">
+            <h3 id="actTitle">Aktivitas Anak</h3>
+            <p>Bermain, belajar, dan berkarya bareng Kiko: mengenal warna dan bentuk, berhitung, memasang bayangan, mengenal huruf, mewarnai, dan mengurutkan angka. Tanpa tekanan waktu dan tanpa kalah, yang penting berani mencoba.</p>
+          </div>
+          <div class="grid" id="actGrid"></div>
+        </section>
+
+        <section id="eduSection" aria-labelledby="eduTitle">
+          <div class="act-head" id="eduHead">
+            <h3 id="eduTitle">Belajar Seru</h3>
+            <p>Bermain sambil belajar bareng Kiko: memilah sampah, mencampur warna, berhitung dengan gundu, mengenal hewan dan huruf, keliling Nusantara dan ASEAN, memasangkan Asmaul Husna, mengetik arti kata di Word Rush, menyusun akor lagu, mengamati bangun ruang, dan belajar menjaga diri. Benar dipuji, keliru dikoreksi lembut, tanpa tekanan.</p>
+          </div>
+          <div class="grid" id="eduGrid"></div>
+        </section>
+
+        <div class="grid" id="gameGrid"></div>
+        <div class="empty-note" id="emptyNote">Belum ada game di kategori ini. Coba kategori lain, ya!</div>
+
+        <footer>
+          <span class="foot-mascot">🦊</span> Portal Game Semua Umur: main bareng Kiko, dari cucu sampai kakek-nenek. Bintang yang kamu kumpulkan berlaku selama halaman ini terbuka.
+        </footer>
+      </div>
+
+      <!-- Game view -->
+      <div id="gameView">
+        <div class="stage-head">
+          <button class="back-btn" id="backBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+            Semua Game
+          </button>
+          <h2 id="stageTitle">Game</h2>
+        </div>
+        <div class="stage" id="stage"></div>
+      </div>
+    </div>
+
+    <div class="confetti" id="confetti"></div>
+
+    <script>
+      "use strict";
+
+      /* Audio: tiny WebAudio bleeps */
+      let audioCtx = null, soundOn = true;
+      function beep(freq, dur, type, vol, when) {
+        if (!soundOn) return;
+        try {
+          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioCtx.state === "suspended") audioCtx.resume();
+          const t = audioCtx.currentTime + (when || 0);
+          const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+          o.type = type || "sine"; o.frequency.value = freq;
+          g.gain.setValueAtTime(vol || 0.12, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + (dur || 0.15));
+          o.connect(g); g.connect(audioCtx.destination);
+          o.start(t); o.stop(t + (dur || 0.15));
+        } catch (e) { /* audio unavailable, stay silent */ }
+      }
+      const sfx = {
+        click: () => beep(620, 0.07, "triangle", 0.08),
+        flip:  () => beep(440, 0.08, "sine", 0.09),
+        good:  () => { beep(660, 0.1, "sine", 0.1); beep(880, 0.14, "sine", 0.1, 0.09); },
+        bad:   () => beep(190, 0.2, "sawtooth", 0.06),
+        win:   () => { [523, 659, 784, 1047].forEach((f, i) => beep(f, 0.16, "triangle", 0.11, i * 0.11)); },
+        pop:   () => beep(920, 0.06, "square", 0.05)
+      };
+      document.getElementById("soundBtn").addEventListener("click", () => {
+        soundOn = !soundOn;
+        document.getElementById("soundBtn").setAttribute("aria-pressed", soundOn ? "true" : "false");
+        document.getElementById("soundOnIcon").style.display = soundOn ? "" : "none";
+        document.getElementById("soundOffIcon").style.display = soundOn ? "none" : "";
+        if (soundOn) sfx.click();
+      });
+
+      /* Game catalog: permainan mendaftar sendiri lewat registerGame()
+         dari berkas modul di folder games/ (dimuat menurut games/catalog.js). */
+      const GAMES = [];
+      const BUILDERS = {};
+      function registerGame(meta) { GAMES.push(meta); }
+
+      const starStore = {}; // id -> 0..3, session only
+
+      const grid = document.getElementById("gameGrid");
+      const actGrid = document.getElementById("actGrid");
+      const eduGrid = document.getElementById("eduGrid");
+      function starHTML(n) {
+        let s = "";
+        for (let i = 1; i <= 3; i++) s += '<span class="' + (i <= n ? "on" : "") + '">★</span>';
+        return s;
+      }
+      function cardHTML(g) {
+        return `
+          <article class="gcard" data-id="${g.id}" data-cats="${g.cats.join(" ")}">
+            <div class="gart" style="background:${g.art}">
+              <span class="big" aria-hidden="true">${g.icon}</span>
+              <span class="stars" aria-hidden="true">${starHTML(starStore[g.id] || 0)}</span>
+              <span class="sr-only">Bintang terbaikmu: ${starStore[g.id] || 0} dari 3</span>
+            </div>
+            <div class="gbody">
+              <h3>${g.name}</h3>
+              <p>${g.desc}</p>
+              <div class="gtags"><span class="tag age">${g.age}</span><span class="tag">${g.mins}</span></div>
+              <button class="play-btn" data-play="${g.id}">Main Sekarang</button>
+            </div>
+          </article>`;
+      }
+      function renderCards() {
+        actGrid.innerHTML = GAMES.filter(g => g.act).map(cardHTML).join("");
+        eduGrid.innerHTML = GAMES.filter(g => g.edu).map(cardHTML).join("");
+        grid.innerHTML = GAMES.filter(g => !g.act && !g.edu).map(cardHTML).join("");
+        document.querySelectorAll("[data-play]").forEach(b =>
+          b.addEventListener("click", () => { sfx.click(); openGame(b.dataset.play); }));
+      }
+
+      /* Filter */
+      let activeFilter = "all";
+      document.querySelectorAll(".chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+          document.querySelectorAll(".chip").forEach(c => { c.classList.remove("active"); c.setAttribute("aria-pressed", "false"); });
+          chip.classList.add("active");
+          chip.setAttribute("aria-pressed", "true");
+          activeFilter = chip.dataset.filter;
+          sfx.click();
+          applyFilter();
+        });
+      });
+      function applyFilter() {
+        let visible = 0, actVisible = 0, eduVisible = 0;
+        document.querySelectorAll(".gcard").forEach(card => {
+          const show = activeFilter === "all" || card.dataset.cats.split(" ").includes(activeFilter);
+          card.classList.toggle("hidden", !show);
+          if (show) {
+            visible++;
+            if (card.closest("#actGrid")) actVisible++;
+            if (card.closest("#eduGrid")) eduVisible++;
+          }
+        });
+        document.getElementById("actSection").style.display = actVisible ? "" : "none";
+        document.getElementById("eduSection").style.display = eduVisible ? "" : "none";
+        document.getElementById("actHead").style.display = activeFilter === "all" ? "" : "none";
+        document.getElementById("eduHead").style.display = activeFilter === "all" ? "" : "none";
+        document.getElementById("emptyNote").classList.toggle("show", visible === 0);
+      }
+
+      /* Mascot */
+      const bubble = document.getElementById("mascotBubble");
+      const mascotBtn = document.getElementById("mascotBtn");
+      const mascotLines = [
+        "Halo! Aku Kiko. Sentuh aku, yuk!",
+        "Hehe, geli! Sekali lagi, dong!",
+        "Kamu tahu? Ular Klasik itu game favoritku!",
+        "Psst… bintang ketiga di Kartu Pasangan itu gampang, asal fokus!",
+        "Main bareng keluarga itu paling seru!",
+        "Ayo, pilih game dari Kotak Keseruan kalau bingung!",
+        "Kamu hebat! Sudah main hari ini?",
+        "Jangan lupa minum air putih habis main, ya!"
+      ];
+      let mascotIdx = 0;
+      mascotBtn.addEventListener("click", () => {
+        mascotIdx = (mascotIdx + 1) % mascotLines.length;
+        bubble.textContent = mascotLines[mascotIdx];
+        mascotBtn.classList.remove("bounce"); void mascotBtn.offsetWidth; mascotBtn.classList.add("bounce");
+        sfx.pop();
+      });
+      function mascotSay(text) { bubble.textContent = text; }
+
+      /* Navigation */
+      const homeView = document.getElementById("homeView");
+      const gameView = document.getElementById("gameView");
+      const stage = document.getElementById("stage");
+      const stageTitle = document.getElementById("stageTitle");
+      let cleanup = null; // active game's teardown
+
+      function openGame(id) {
+        const g = GAMES.find(x => x.id === id);
+        if (!g) return;
+        if (cleanup) { cleanup(); cleanup = null; }
+        homeView.style.display = "none";
+        gameView.classList.add("open");
+        stageTitle.textContent = g.name;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        BUILDERS[id]();
+      }
+      function closeGame() {
+        if (cleanup) { cleanup(); cleanup = null; }
+        gameView.classList.remove("open");
+        homeView.style.display = "";
+        renderCards(); applyFilter();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      document.getElementById("backBtn").addEventListener("click", () => { sfx.click(); closeGame(); });
+      document.getElementById("btnScroll").addEventListener("click", () => {
+        sfx.click();
+        document.getElementById("gamesAnchor").scrollIntoView({ behavior: "smooth" });
+      });
+      document.getElementById("btnRandom").addEventListener("click", () => {
+        sfx.win();
+        mascotSay("Kotak Keseruan memilihkan game buatmu…");
+        const pick = GAMES[Math.floor(Math.random() * GAMES.length)];
+        setTimeout(() => openGame(pick.id), 450);
+      });
+
+      /* Shared helpers */
+      function confettiBurst() {
+        const box = document.getElementById("confetti");
+        const colors = ["#ff6b5b", "#ffb92e", "#17b8a6", "#3d9be9", "#f06292"];
+        for (let i = 0; i < 42; i++) {
+          const piece = document.createElement("i");
+          piece.style.left = Math.random() * 100 + "vw";
+          piece.style.background = colors[i % colors.length];
+          piece.style.animationDuration = (0.9 + Math.random() * 0.9) + "s";
+          piece.style.animationDelay = (Math.random() * 0.25) + "s";
+          piece.style.transform = "rotate(" + (Math.random() * 360) + "deg)";
+          box.appendChild(piece);
+          setTimeout(() => piece.remove(), 2400);
+        }
+      }
+      function awardStars(id, stars) {
+        if ((starStore[id] || 0) < stars) starStore[id] = stars;
+      }
+      function winScreen(emoji, title, text, stars, againFn) {
+        stage.innerHTML = `
+          <div class="center-msg">
+            <div class="emoji">${emoji}</div>
+            <h3>${title}</h3>
+            <p>${text}</p>
+            <p><span role="img" aria-label="Kamu dapat ${stars} dari 3 bintang" style="display:inline-block;font-size:1.6rem;letter-spacing:6px;background:#1d2b38;padding:6px 14px 6px 20px;border-radius:999px;color:#ffd94d">${"★".repeat(stars)}<span style="color:#cbd5e1">${"★".repeat(3 - stars)}</span></span></p>
+            <button class="btn btn-coral" id="againBtn">Main Lagi</button>
+            <button class="btn btn-ghost" id="quitBtn">Pilih Game Lain</button>
+          </div>`;
+        document.getElementById("againBtn").addEventListener("click", () => { sfx.click(); againFn(); });
+        document.getElementById("quitBtn").addEventListener("click", () => { sfx.click(); closeGame(); });
+        if (stars >= 2) confettiBurst();
+        sfx.win();
+      }
+      function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+        return a;
+      }
+
+      /* Shared helpers for the kids activity wing: big instructions from Kiko,
+         instant praise, a gentle shake on a wrong tap, no timers, no losing. */
+      const PRAISE = ["Hebat!", "Pintar!", "Bagus sekali!", "Keren sekali!", "Luar biasa!"];
+      function praiseWord() { return PRAISE[Math.floor(Math.random() * PRAISE.length)]; }
+      function gentleShake(el) {
+        el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake");
+      }
+      function shapeSVG(shape, color) {
+        const inner = {
+          lingkaran: '<circle cx="50" cy="50" r="42" fill="' + color + '"/>',
+          persegi: '<rect x="12" y="12" width="76" height="76" rx="10" fill="' + color + '"/>',
+          segitiga: '<polygon points="50,10 92,86 8,86" fill="' + color + '"/>',
+          bintang: '<polygon points="50,6 62,37 95,37 68,57 78,90 50,70 22,90 32,57 5,37 38,37" fill="' + color + '"/>',
+          hati: '<path d="M50 86C24 64 10 50 10 33 10 19 20 10 32 10c8 0 15 4 18 11 3-7 10-11 18-11 12 0 22 9 22 23 0 17-14 31-40 53z" fill="' + color + '"/>'
+        }[shape];
+        return '<svg viewBox="0 0 100 100" aria-hidden="true">' + inner + "</svg>";
+      }
+
+      /* ===== Belajar Seru: shared quiz flow for the learning games.
+         Big options, instant praise from Kiko, gentle correction that keeps the
+         child trying, and completion stars like every other game. ===== */
+      function bigVisual(emoji, cap) {
+        return '<div class="big-visual"><span aria-hidden="true">' + emoji + "</span>" +
+          (cap ? '<span class="cap">' + cap + "</span>" : "") + "</div>";
+      }
+      function tOpt(text, correct) {
+        return { label: text, html: '<span class="opt-text">' + text + "</span>", correct: !!correct };
+      }
+      function eOpt(emoji, text, correct) {
+        return { label: text, html: '<span class="opt-emoji" aria-hidden="true">' + emoji + '</span><span class="opt-text">' + text + "</span>", correct: !!correct };
+      }
+      function quizFlow(cfg) {
+        const TOTAL = cfg.questions.length;
+        let idx = 0, mistakes = 0, busy = false;
+        stage.innerHTML =
+          '<div class="hud"><span class="stat">' + (cfg.hud || "Soal") + ': <b id="qzNum">1 / ' + TOTAL + "</b></span></div>" +
+          '<div class="kiko-bar"><span class="kiko-face" aria-hidden="true">🦊</span><p class="kiko-text" id="qzKiko" aria-live="polite"></p></div>' +
+          '<div id="qzVisual"></div>' +
+          '<div class="big-opts" id="qzOpts" style="' + (cfg.optsStyle || "") + '"></div>';
+        const kiko = document.getElementById("qzKiko");
+        const vis = document.getElementById("qzVisual");
+        const box = document.getElementById("qzOpts");
+        function finish() {
+          const stars = mistakes === 0 ? 3 : mistakes <= 2 ? 2 : 1;
+          awardStars(cfg.id, stars);
+          mascotSay(cfg.mascot);
+          winScreen(cfg.emoji, cfg.title, cfg.text(mistakes), stars, cfg.builder);
+        }
+        function next() {
+          busy = false;
+          const q = cfg.questions[idx];
+          document.getElementById("qzNum").textContent = (idx + 1) + " / " + TOTAL;
+          kiko.textContent = q.kiko;
+          vis.innerHTML = q.visual || "";
+          box.innerHTML = "";
+          shuffle(q.options).forEach(o => {
+            const b = document.createElement("button");
+            b.className = "big-opt";
+            if (o.style) b.setAttribute("style", o.style);
+            b.setAttribute("aria-label", o.label);
+            b.innerHTML = o.html;
+            b.addEventListener("click", () => {
+              if (busy) return;
+              if (o.correct) {
+                busy = true; sfx.good();
+                b.classList.add("praise-pop");
+                kiko.textContent = praiseWord() + " " + (q.fact || "Betul sekali!");
+                idx++;
+                setTimeout(() => { if (idx >= TOTAL) finish(); else next(); }, q.fact ? 1600 : 1050);
+              } else {
+                mistakes++; sfx.flip();
+                gentleShake(b);
+                b.classList.add("used");
+                kiko.textContent = q.hint || "Belum tepat. Coba lagi, yuk!";
+              }
+            });
+            box.appendChild(b);
+          });
+        }
+        next();
+      }
+
+      /* Module loader: muat tiap modul game berurutan sesuai katalog,
+         lalu gambar kartunya sekali setelah semua game terdaftar. */
+      function loadGameModules(list) {
+        let i = 0;
+        function next() {
+          if (i >= list.length) { renderCards(); return; }
+          const s = document.createElement("script");
+          s.src = "games/" + list[i];
+          s.onload = function () { i++; next(); };
+          s.onerror = function () { i++; next(); };
+          document.head.appendChild(s);
+        }
+        next();
+      }
+    </script>
+    <script src="games/catalog.js"></script>
+    <script>
+      loadGameModules(window.GAME_CATALOG || []);
+    </script>
+  </body>
+</html>
