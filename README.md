@@ -1,6 +1,6 @@
 # Portal Game Semua Umur — ayomain
 
-Portal game web berbahasa Indonesia untuk semua umur: **29 game ringan** dalam satu halaman, ditemani maskot rubah **Kiko**. Tanpa build step, tanpa framework — vanilla HTML/CSS/JavaScript murni, jalan langsung dari berkas statis.
+Portal game web berbahasa Indonesia untuk semua umur: **32 game ringan** dalam satu halaman, ditemani maskot rubah **Kiko**. Tanpa build step, tanpa framework — vanilla HTML/CSS/JavaScript murni, jalan langsung dari berkas statis.
 
 **Live:** https://ayomain.cloud
 
@@ -37,6 +37,9 @@ Portal game web berbahasa Indonesia untuk semua umur: **29 game ringan** dalam s
 | `jagoakor.js` | Jago Akor |
 | `bangunruang.js` | Bangun Ruang |
 | `petualanganaman.js` | Petualangan Aman |
+| `bata.js` | Pecah Bata |
+| `ufo.js` | Tembak UFO |
+| `pong.js` | Pong Kiko |
 
 ## Cara Menjalankan
 

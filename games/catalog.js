@@ -29,5 +29,8 @@ window.GAME_CATALOG = [
   "wordrush.js",
   "jagoakor.js",
   "bangunruang.js",
-  "petualanganaman.js"
+  "petualanganaman.js",
+  "bata.js",
+  "ufo.js",
+  "pong.js"
 ];
